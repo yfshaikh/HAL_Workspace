@@ -2,14 +2,16 @@
 #include <stdint.h>
 
 
-
-usart_init(void);
+USART_HandleTypeDef huart2;
+uart_init(void);
 
 int main() {
   HAL_Init();
-  usart_init();
+  uart_init();
 
+  while (1) {
 
+  }
   
 }
 
@@ -24,13 +26,12 @@ void SysTick_Handler(void) {
   HAL_IncTick();
 }
 
-void usart_init(void) {
+void uart_init(void) {
 
   /*
    * note: the InitTypeDef is a member inside the HandleTypeDef
   */
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-  USART_HandleTypeDef huart2;
 
   // enable UART pins clock access
   __HAL_RCC_GPIOA_CLK_ENABLE();
