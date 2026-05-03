@@ -3,14 +3,17 @@
 
 
 USART_HandleTypeDef huart2;
-uart_init(void);
+void uart_init(void);
+
+char message[20] = "Hello, World!\r\n";
 
 int main() {
   HAL_Init();
   uart_init();
 
   while (1) {
-
+    // delay is the time between each transmission of the message
+    HAL_UART_Transmit(&huart2, (uint8_t *)message, strlen(message), HAL_MAX_DELAY);
   }
   
 }
