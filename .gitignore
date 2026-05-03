@@ -1,3 +1,6 @@
 Drivers/
 .metadata/
 DS_Store
+Drivers_min/
+*/Drivers/
+*/.metadata/
