@@ -1,0 +1,19 @@
+!SESSION 2026-05-02 18:57:50.204 -----------------------------------------------
+eclipse.buildId=Version 1.19.0
+java.version=21.0.3
+java.vendor=Eclipse Adoptium
+BootLoader constants: OS=macosx, ARCH=x86_64, WS=cocoa, NL=en_US
+Framework arguments:  -keyring /Users/yusufshaikh/.eclipse_keyring
+Command-line arguments:  -os macosx -ws cocoa -arch x86_64 -keyring /Users/yusufshaikh/.eclipse_keyring -data /Users/yusufshaikh/STM32CubeIDE/HAL_Workspace
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 4 4 2026-05-02 18:58:04.222
+!MESSAGE CubeMX plugin appears to be active, Log4j initialization might be too late.
+
+!ENTRY com.st.stm32cube.ide.mcu.informationcenter 1 1 2026-05-02 18:58:04.224
+!MESSAGE Log4j2 initialized with config file /Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/.metadata/.log4j2.xml
+
+!ENTRY com.st.stm32cube.ide.mcu.ide 1 1 2026-05-02 18:58:10.526
+!MESSAGE Started RMI Server, listening on port 41341
+
+!ENTRY org.eclipse.cdt.core 1 0 2026-05-02 19:19:51.622
+!MESSAGE Indexed '01_GPIO_In_out' (3 sources, 53 headers) in 4.57 sec: 1,954 declarations; 2,863 references; 0 unresolved inclusions; 2 syntax errors; 2 unresolved names (0.042%)
