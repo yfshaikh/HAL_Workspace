@@ -2,18 +2,21 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "uart.h"
+#include "adc.h"
 
 
 
-
-
+uint32_t sensor_value;
 
 int main() {dddd
   HAL_Init();
   uart_init();
 
+  adc_init_start();
+
   while (1) {
-    printf("%s", message);
+    sensor_value = p0_adc_read();
+    printf("Sensor Value: %lu\n", (unsigned long)sensor_value);
     HAL_Delay(1000); // delay is the time between each transmission of the message
   }
   
