@@ -52,4 +52,3 @@ void adc_pa0_continuous_conversion_init(void) {
     sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES; // set sampling time
     HAL_ADC_ConfigChannel(&hadc1, &sConfig); // configure the ADC channel with the specified settings
 }
-
