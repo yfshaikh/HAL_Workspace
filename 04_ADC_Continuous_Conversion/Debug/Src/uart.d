@@ -1,4 +1,4 @@
-Src/main.o: ../Src/main.c \
+Src/uart.o: ../Src/uart.c \
  /Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/04_ADC_Continuous_Conversion/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal.h \
  ../Inc/stm32f4xx_hal_conf.h \
  /Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/04_ADC_Continuous_Conversion/Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_rcc.h \

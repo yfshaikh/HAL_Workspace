@@ -33,34 +33,34 @@ $(wildcard ../makefile.init) \
 $(wildcard ../makefile.targets) \
 
 
-BUILD_ARTIFACT_NAME := 02_UART_TX_Polling
+BUILD_ARTIFACT_NAME := 04_ADC_Continuous_Conversion
 BUILD_ARTIFACT_EXTENSION := elf
 BUILD_ARTIFACT_PREFIX :=
 BUILD_ARTIFACT := $(BUILD_ARTIFACT_PREFIX)$(BUILD_ARTIFACT_NAME)$(if $(BUILD_ARTIFACT_EXTENSION),.$(BUILD_ARTIFACT_EXTENSION),)
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXECUTABLES += \
-02_UART_TX_Polling.elf \
+04_ADC_Continuous_Conversion.elf \
 
 MAP_FILES += \
-02_UART_TX_Polling.map \
+04_ADC_Continuous_Conversion.map \
 
 SIZE_OUTPUT += \
 default.size.stdout \
 
 OBJDUMP_LIST += \
-02_UART_TX_Polling.list \
+04_ADC_Continuous_Conversion.list \
 
 
 # All Target
 all: main-build
 
 # Main-build Target
-main-build: 02_UART_TX_Polling.elf secondary-outputs
+main-build: 04_ADC_Continuous_Conversion.elf secondary-outputs
 
 # Tool invocations
-02_UART_TX_Polling.elf 02_UART_TX_Polling.map: $(OBJS) $(USER_OBJS) /Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/02_UART_TX_Polling/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-gcc -o "02_UART_TX_Polling.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/02_UART_TX_Polling/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="02_UART_TX_Polling.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
+04_ADC_Continuous_Conversion.elf 04_ADC_Continuous_Conversion.map: $(OBJS) $(USER_OBJS) /Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/04_ADC_Continuous_Conversion/STM32F411RETX_FLASH.ld makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-gcc -o "04_ADC_Continuous_Conversion.elf" @"objects.list" $(USER_OBJS) $(LIBS) -mcpu=cortex-m4 -T"/Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/04_ADC_Continuous_Conversion/STM32F411RETX_FLASH.ld" --specs=nosys.specs -Wl,-Map="04_ADC_Continuous_Conversion.map" -Wl,--gc-sections -static --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -Wl,--start-group -lc -lm -Wl,--end-group
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -69,14 +69,14 @@ default.size.stdout: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
 	@echo 'Finished building: $@'
 	@echo ' '
 
-02_UART_TX_Polling.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
-	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "02_UART_TX_Polling.list"
+04_ADC_Continuous_Conversion.list: $(EXECUTABLES) makefile objects.list $(OPTIONAL_TOOL_DEPS)
+	arm-none-eabi-objdump -h -S $(EXECUTABLES) > "04_ADC_Continuous_Conversion.list"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) 02_UART_TX_Polling.elf 02_UART_TX_Polling.list 02_UART_TX_Polling.map default.size.stdout
+	-$(RM) 04_ADC_Continuous_Conversion.elf 04_ADC_Continuous_Conversion.list 04_ADC_Continuous_Conversion.map default.size.stdout
 	-@echo ' '
 
 secondary-outputs: $(SIZE_OUTPUT) $(OBJDUMP_LIST)

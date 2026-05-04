@@ -8,29 +8,32 @@ C_SRCS += \
 ../Src/main.c \
 ../Src/syscalls.c \
 ../Src/sysmem.c \
-../Src/system_stm32f4xx.c 
+../Src/system_stm32f4xx.c \
+../Src/uart.c 
 
 OBJS += \
 ./Src/main.o \
 ./Src/syscalls.o \
 ./Src/sysmem.o \
-./Src/system_stm32f4xx.o 
+./Src/system_stm32f4xx.o \
+./Src/uart.o 
 
 C_DEPS += \
 ./Src/main.d \
 ./Src/syscalls.d \
 ./Src/sysmem.d \
-./Src/system_stm32f4xx.d 
+./Src/system_stm32f4xx.d \
+./Src/uart.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
 Src/%.o Src/%.su Src/%.cyclo: ../Src/%.c Src/subdir.mk
-	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -DUSE_HAL_DRIVER -c -I../Inc -I/Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/02_UART_TX_Polling/Drivers/CMSIS/Include -I/Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/02_UART_TX_Polling/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/02_UART_TX_Polling/Drivers/STM32F4xx_HAL_Driver/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
+	arm-none-eabi-gcc "$<" -mcpu=cortex-m4 -std=gnu11 -g3 -DDEBUG -DNUCLEO_F411RE -DSTM32 -DSTM32F4 -DSTM32F411RETx -c -I../Inc -I/Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/04_ADC_Continuous_Conversion/Drivers/CMSIS/Include -I/Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/04_ADC_Continuous_Conversion/Drivers/CMSIS/Device/ST/STM32F4xx/Include -I/Users/yusufshaikh/STM32CubeIDE/HAL_Workspace/04_ADC_Continuous_Conversion/Drivers/STM32F4xx_HAL_Driver/Inc -O0 -ffunction-sections -fdata-sections -Wall -fstack-usage -fcyclomatic-complexity -MMD -MP -MF"$(@:%.o=%.d)" -MT"$@" --specs=nano.specs -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -o "$@"
 
 clean: clean-Src
 
 clean-Src:
-	-$(RM) ./Src/main.cyclo ./Src/main.d ./Src/main.o ./Src/main.su ./Src/syscalls.cyclo ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.cyclo ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su ./Src/system_stm32f4xx.cyclo ./Src/system_stm32f4xx.d ./Src/system_stm32f4xx.o ./Src/system_stm32f4xx.su
+	-$(RM) ./Src/main.cyclo ./Src/main.d ./Src/main.o ./Src/main.su ./Src/syscalls.cyclo ./Src/syscalls.d ./Src/syscalls.o ./Src/syscalls.su ./Src/sysmem.cyclo ./Src/sysmem.d ./Src/sysmem.o ./Src/sysmem.su ./Src/system_stm32f4xx.cyclo ./Src/system_stm32f4xx.d ./Src/system_stm32f4xx.o ./Src/system_stm32f4xx.su ./Src/uart.cyclo ./Src/uart.d ./Src/uart.o ./Src/uart.su
 
 .PHONY: clean-Src
 
