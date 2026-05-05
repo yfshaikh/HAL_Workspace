@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>05_ADC_Single_Conversion2</name>
+	<name>05_GPIO_Interrupt_EXTI</name>
 	<comment></comment>
 	<projects>
 	</projects>
