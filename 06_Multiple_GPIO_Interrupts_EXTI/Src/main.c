@@ -43,7 +43,16 @@ void gpio_pc13_interrupt_init(void){
 
   HAL_GPIO_Init(BTN_PORT, &GPIO_InitStruct);
 
-  
+  // configure PA0 (we will also subscribe to the interrupt for this pin)
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING; // interrupt on rising edge
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+
+  HAL_GPIO_Init(BTN_PORT, &GPIO_InitStruct);
+
+
+
 
   // once we initialize the GPIO pin, we can reuse the InitStruct for the LED pin by just changing the relevant fields.
   GPIO_InitStruct.Pin = LED_PIN;
@@ -55,11 +64,24 @@ void gpio_pc13_interrupt_init(void){
 
   // configure EXTI
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0); // set the priority of the EXTI interrupt (also 0 for preemption priority and 0 for subpriority)
+  HAL_NVIC_EnableIRQ(int EXTI15_10_IRQn); // enable the EXTI interrupt in the NVIC (Nested Vectored Interrupt Controller)
 
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 3, 0); // lower priority for EXTI0
+  HAL_NVIC_EnableIRQ(int EXTII0_IRQn);
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
-  HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
+  if (GPIO_Pin == BTN_PIN) {
+    // this callback function will be called whenever there is an interrupt on the button pin (PC13).
+    // we can check which pin caused the interrupt by checking the GPIO_Pin parameter, which will be equal to BTN_PIN if the interrupt was caused by the button pin.
+    // in this case, we will toggle the LED pin (PD12) whenever the button is pressed.
+    HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
+  }
+  else if (GPIO_Pin == GPIO_PIN_0) {
+    // if the interrupt was caused by PA0, we can do something else here. For example, we can toggle the LED pin as well, but with a different pattern or frequency.
+    // for simplicity, we will just toggle the LED pin again here.
+    HAL_GPIO_TogglePin(LED_PORT, LED_PIN);
+  }
 }
 
 
@@ -67,5 +89,12 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
 // it will be called whenever there is an interrupt on any of the pins in that range, but we will check if it was pin 13 that caused the interrupt.
 void EXTI15_10_IRQHandler(void) {
   HAL_GPIO_EXTI_IRQHandler(BTN_PIN); // this will call the callback function HAL_GPIO_EXTI_Callback() if the interrupt was caused by pin 13.
+}
+
+
+
+
+void EXTI0_IRQHandler(void) {
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0); // this will call the callback function HAL_GPIO_EXTI_Callback() if the interrupt was caused by pin 0.
 }
 
