@@ -53,7 +53,7 @@ void gpio_pc13_interrupt_init(void){
 
   // configure EXTI
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0); // set the priority of the EXTI interrupt (also 0 for preemption priority and 0 for subpriority)
-
+  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn); // enable the EXTI interrupt in the NVIC (Nested Vectored Interrupt Controller)
 }
 
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin) {
