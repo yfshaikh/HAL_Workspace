@@ -43,6 +43,8 @@ void gpio_pc13_interrupt_init(void){
 
   HAL_GPIO_Init(BTN_PORT, &GPIO_InitStruct);
 
+  
+
   // once we initialize the GPIO pin, we can reuse the InitStruct for the LED pin by just changing the relevant fields.
   GPIO_InitStruct.Pin = LED_PIN;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP; // output push-pull mode
