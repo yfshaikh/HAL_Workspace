@@ -3,6 +3,48 @@
 
 extern ADC_HandleTypeDef hadc1;
 
+/*
+ * ============================================================================
+ * ADC CONVERSION MODES: CONTINUOUS vs INTERRUPT
+ * ============================================================================
+ * 
+ * This file provides two different ADC initialization functions for different
+ * use cases. Choose ONE - do not use both simultaneously.
+ * 
+ * 1. CONTINUOUS CONVERSION MODE (adc_pa0_continuous_conversion_init)
+ *    - ADC continuously converts PA0 repeatedly: ADC → ADC → ADC → ...
+ *    - Starts once with HAL_ADC_Start(), runs forever automatically
+ *    - You POLL for data by calling p0_adc_read() whenever you want
+ *    - No interrupts or callbacks needed
+ *    - Best for: Steady stream of readings, simple monitoring
+ *    - CPU efficiency: Lower (wastes cycles if you don't check frequently)
+ * 
+ *    Usage:
+ *    adc_pa0_continuous_conversion_init();
+ *    HAL_ADC_Start(&hadc1);
+ *    while (1) {
+ *        uint32_t value = p0_adc_read();  // Read whenever you want
+ *    }
+ * 
+ * 2. INTERRUPT MODE (adc_pa0_interrupt_init)
+ *    - ADC converts once per software/hardware trigger
+ *    - Conversion completes → interrupt fires → callback called with data
+ *    - HAL_ADC_Start_IT() enables interrupt-driven mode
+ *    - CPU is notified when data is ready (event-driven)
+ *    - Best for: Reacting to specific events, efficient data handling
+ *    - CPU efficiency: Higher (CPU only processes when interrupt fires)
+ * 
+ *    Usage:
+ *    adc_pa0_interrupt_init();
+ *    HAL_ADC_Start_IT(&hadc1);
+ *    // Callback fires automatically when each conversion completes
+ *    void HAL_ADC_ConvCpltCallback(...) {
+ *        uint32_t value = p0_adc_read();
+ *    }
+ * 
+ * ============================================================================
+ */
+
 static void adc_pa0_continuous_conversion_init(void);
 
 uint32_t p0_adc_read(void) {
@@ -51,10 +93,6 @@ void adc_pa0_continuous_conversion_init(void) {
     sConfig.Rank = 1; // rank of the channel in the regular group sequence
     sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES; // set sampling time
     HAL_ADC_ConfigChannel(&hadc1, &sConfig); // configure the ADC channel with the specified settings
-
-    // enable ADC interrupt
-    HAL_NVIC_SetPriority(ADC_IRQn, 0, 0); // set ADC interrupt priority
-    HAL_NVIC_EnableIRQ(ADC_IRQn); // enable ADC interrupt in the NVIC
 }
 
 
@@ -95,6 +133,10 @@ void adc_pa0_interrupt_init(void) {
     sConfig.Rank = 1; // rank of the channel in the regular group sequence
     sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES; // set sampling time
     HAL_ADC_ConfigChannel(&hadc1, &sConfig); // configure the ADC channel with the specified settings
+
+    // enable ADC interrupt in the NVIC
+    HAL_NVIC_SetPriority(ADC_IRQn, 0, 0); // set ADC interrupt priority
+    HAL_NVIC_EnableIRQ(ADC_IRQn); // enable ADC interrupt in the NVIC controller
 }
 
 
