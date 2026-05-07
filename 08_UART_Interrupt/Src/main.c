@@ -2,7 +2,7 @@
 #include <stdint.h>
 
 
-USART_HandleTypeDef huart2;
+USART_HandleTypeDef huart1;
 void uart_init(void);
 
 char message[20] = "Hello, World!\r\n";
@@ -13,7 +13,7 @@ int main() {
 
   while (1) {
     // delay is the time between each transmission of the message
-    HAL_UART_Transmit(&huart2, (uint8_t *)message, strlen(message), HAL_MAX_DELAY);
+    HAL_UART_Transmit(&huart1, (uint8_t *)message, strlen(message), HAL_MAX_DELAY);
   }
   
 }
@@ -40,25 +40,25 @@ void uart_init(void) {
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
   // enable UART clock access
-  __HAL_RCC_USART2_CLK_ENABLE();
+  __HAL_RCC_USART1_CLK_ENABLE();
 
   // configure pins to act as alternate function pins for UART
-  GPIO_InitStruct.Pin = GPIO_PIN_2 | GPIO_PIN_3; // PA2 = USART2_TX, PA3 = USART2_RX. the | operator is used to combine the two pin numbers into a single value that can be passed to the HAL_GPIO_Init() function.
+  GPIO_InitStruct.Pin = GPIO_PIN_9 | GPIO_PIN_10; // PA9 = USART1_TX, PA10 = USART1_RX. the | operator is used to combine the two pin numbers into a single value that can be passed to the HAL_GPIO_Init() function.
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP; // alternate function push-pull mode. This means that the pin will be controlled by the alternate function (in this case, the USART peripheral) and will be in push-pull mode, which allows it to drive both high and low output levels.
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF7_USART2; // alternate function 7 is the USART2 peripheral. This tells the microcontroller to route the USART2 signals to these pins.
+  GPIO_InitStruct.Alternate = GPIO_AF7_USART1; // alternate function 7 is the USART1 peripheral. This tells the microcontroller to route the USART1 signals to these pins.
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   // configure UART peripheral
-  huart2.Instance = USART2;
-  huart2.Init.BaudRate = 115200;
-  huart2.Init.WordLength = UART_WORDLENGTH_8B;
-  huart2.Init.StopBits = UART_STOPBITS_1;
-  huart2.Init.Parity = UART_PARITY_NONE;
-  huart2.Init.Mode = UART_MODE_TX;
-  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
-  HAL_UART_Init(&huart2);
+  huart1.Instance = USART1;
+  huart1.Init.BaudRate = 115200;
+  huart1.Init.WordLength = UART_WORDLENGTH_8B;
+  huart1.Init.StopBits = UART_STOPBITS_1;
+  huart1.Init.Parity = UART_PARITY_NONE;
+  huart1.Init.Mode = UART_MODE_TX;
+  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
+  HAL_UART_Init(&huart1);
 
 }
