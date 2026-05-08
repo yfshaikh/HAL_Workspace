@@ -11,11 +11,17 @@ void spi1_init(void);
 uint8_t tx_buffer[10] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
 uint8_t rx_buffer[10];
 
+int counter = 0;
+
+void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi) {
+  counter++;
+}
+
 int main() {
   HAL_Init();
   spi1_init();
 
-  HAL_SPI_TransmitReceive(&hspi1, tx_buffer, rx_buffer, sizeof(tx_buffer), HAL_MAX_DELAY);
+  HAL_SPI_TransmitReceive_IT(&hspi1, tx_buffer, rx_buffer, sizeof(tx_buffer));
 
   while (1) {
 
@@ -91,6 +97,14 @@ void spi1_init(void) {
   hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE; // No CRC error checking
   hspi1.Init.CRCPolynomial = 10; // CRC polynomial (unused since CRC disabled)
   HAL_SPI_Init(&hspi1);
+
+  HAL_NVIC_SetPriority(SPI1_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(SPI1_IRQn);
+
+}
+
+void SPI1_IRQHandler(void){
+  HAL_SPI_IRQHandler(&hspi1); // calls the STM32 HAL library callback function to handle the interrupt for SPI1, which manages tasks like clearing interrupt flags and invoking any registered callbacks for SPI events such as transfer complete or errors.
 }
 
 void SysTick_Handler(void) {
