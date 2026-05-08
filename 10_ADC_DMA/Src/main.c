@@ -9,14 +9,15 @@
 
 void gpio_pc13_interrupt_init(void);
 
+uint32_t sensor_value[1];
+
 int main() {
   HAL_Init();
   uart_init();
-  adc_pa0_interrupt_init(void);
+  adc_pa0_dma_init();
 
   // start ADC
-  // we have already configured the ADC to run in continuous conversion mode, so we just need to start it once and it will keep converting and generating interrupts whenever a conversion is complete.
-  HAL_ADC_Start_IT(&hadc1); // start ADC in interrupt mode, so that it will generate an interrupt whenever a conversion is complete and the data is ready to be read.
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)sensor_value, sizeof(sensor_value)); // start ADC in DMA mode, so that it will transfer data to the buffer automatically whenever a conversion is complete and the data is ready to be read.
 
 
   while (1) {
