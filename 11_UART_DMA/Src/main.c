@@ -3,38 +3,24 @@
 
 
 USART_HandleTypeDef huart1;
+DMA_HandleTypeDef hdma_usart1_rx;
+DMA_HandleTypeDef hdma_usart1_tx;
 void uart_init(void);
 
 uint8_t tx_buffer[10] = {10, 20, 30, 40, 50, 60, 70, 80, 90, 100};
 uint8_t rx_buffer[10];
 
-uint32_t rx_counter, tx_counter;
-/*
- * Called automatically when UART transmission completes (all bytes sent)
- * This is a weak callback function that you override to handle TX completion
- * In this case, we just increment a counter to track how many transmissions finished
- */void HAL_UART_TxCpltCallback(USART_HandleTypeDef *huart) {
-  tx_counter++;
-}
-/*
- * Called automatically when UART reception completes (all expected bytes received)
- * This is a weak callback function that you override to handle RX completion
- * In this case, we just increment a counter to track how many receptions finished
- */void HAL_UART_RxCpltCallback(USART_HandleTypeDef *huart) {
-  rx_counter++;
-}
-
 /*
  * Main program entry point
- * Initializes UART peripheral and sets up interrupt-driven transmission and reception
- * The while loop does nothing - all work is handled by UART interrupt callbacks
+ * Initializes UART peripheral and sets up DMA-driven transmission and reception
+ * The while loop does nothing - all work is handled by DMA interrupt handlers
  */
 int main() {
   HAL_Init();
   uart_init();
   
-  HAL_UART_Transmit_IT(&huart1, (uint8_t *)tx_buffer, sizeof(tx_buffer), HAL_MAX_DELAY);
-  HAL_UART_Receive_IT(&huart1, (uint8_t *)rx_buffer, sizeof(rx_buffer));
+  HAL_UART_Transmit_DMA(&huart1, (uint8_t *)tx_buffer, sizeof(tx_buffer), HAL_MAX_DELAY);
+  HAL_UART_Receive_DMA(&huart1, (uint8_t *)rx_buffer, sizeof(rx_buffer));
 
   while (1) {
     
@@ -71,6 +57,9 @@ void uart_init(void) {
   // enable UART clock access
   __HAL_RCC_USART1_CLK_ENABLE();
 
+  // enable DMA clock access
+  __HAL_RCC_DMA2_CLK_ENABLE();
+
   // configure pins to act as alternate function pins for UART
   GPIO_InitStruct.Pin = GPIO_PIN_9 | GPIO_PIN_10; // PA9 = USART1_TX, PA10 = USART1_RX. the | operator is used to combine the two pin numbers into a single value that can be passed to the HAL_GPIO_Init() function.
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP; // alternate function push-pull mode. This means that the pin will be controlled by the alternate function (in this case, the USART peripheral) and will be in push-pull mode, which allows it to drive both high and low output levels.
@@ -90,18 +79,53 @@ void uart_init(void) {
   huart1.Init.OverSampling = UART_OVERSAMPLING_16;
   HAL_UART_Init(&huart1);
 
-  HAL_NVIC_SetPriority(USART1_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(USART1_IRQn);
+  // configure usart1 rx dma
+  hdma_usart1_rx.Instance = DMA2_Stream2; // select DMA2 Stream2 for USART1 RX data transfer. This stream is commonly used for USART1 RX on STM32F4 microcontrollers, allowing efficient data movement from the USART peripheral to memory without CPU intervention.
+  hdma_usart1_rx.Init.Channel = DMA_CHANNEL_4; // select channel 4 for the DMA transfer. This channel is typically associated with USART1 RX in STM32F4 microcontrollers, enabling efficient data movement from the USART1 peripheral to memory without CPU intervention.
+  hdma_usart1_rx.Init.Direction = DMA_PERIPH_TO_MEMORY; // set DMA transfer direction from peripheral to memory, which is appropriate for USART RX operations where data is received from the USART peripheral and stored in memory.
+  hdma_usart1_rx.Init.PeriphInc = DMA_PINC_DISABLE; // disable peripheral address increment. This means that the peripheral address (USART data register) will remain constant during the DMA transfer, while the memory address will increment to store successive received bytes in a buffer.
+  hdma_usart1_rx.Init.MemInc = DMA_MINC_ENABLE; // enable memory address increment. This allows the memory address to increment after each data transfer, which is necessary for storing multiple received bytes in a buffer.
+  hdma_usart1_rx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE; // set peripheral data alignment to byte (8 bits). This matches the typical data size for USART communication, ensuring proper data handling during the DMA transfer.
+  hdma_usart1_rx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE; // set memory data alignment to byte (8 bits). This ensures that the data stored in memory is properly aligned for USART communication, which typically involves 8-bit data frames, allowing for efficient access and processing of the received data in memory.
+  hdma_usart1_rx.Init.Mode = DMA_NORMAL; // set DMA mode to normal. This means that the DMA transfer will complete after transferring all the data in the buffer.
+  hdma_usart1_rx.Init.Priority = DMA_PRIORITY_LOW; // set DMA priority to low. This determines the priority of the DMA transfer relative to other DMA streams. In this case, we set it to low since USART RX data transfers typically do not require high priority compared to other critical DMA operations in the system.
+  hdma_usart1_rx.Init.FIFOMode = DMA_FIFOMODE_DISABLE; // disable FIFO mode for the DMA transfer. This means that the DMA will operate in direct mode, transferring data directly between the peripheral and memory without using an intermediate FIFO buffer, which is suitable for simple USART RX operations where data is received in a straightforward manner without the need for complex buffering.
+  HAL_DMA_Init(&hdma_usart1_rx); // initialize the DMA with the specified settings for USART1 RX
 
+  // link the DMA handle to the UART handle for RX operations
+  huart1.hdmarx = &hdma_usart1_rx; // link the DMA handle to the UART handle for RX operations. This allows the HAL library to manage DMA transfers for USART1 RX using the specified DMA configuration, enabling efficient data reception without CPU intervention.
+
+  // configure usart1 tx dma
+  hdma_usart1_tx.Instance = DMA2_Stream7; // select DMA2 Stream7 for USART1 TX data transfer. This stream is commonly used for USART1 TX on STM32F4 microcontrollers, allowing efficient data movement from memory to the USART peripheral without CPU intervention.
+  hdma_usart1_tx.Init.Channel = DMA_CHANNEL_4; // select channel 4 for the DMA transfer. This channel is typically associated with USART1 TX in STM32F4 microcontrollers, enabling efficient data movement from memory to the USART1 peripheral without CPU intervention.
+  hdma_usart1_tx.Init.Direction = DMA_MEMORY_TO_PERIPH; // set DMA transfer direction from memory to peripheral, which is appropriate for USART TX operations where data is transmitted from memory to the USART peripheral.
+  hdma_usart1_tx.Init.PeriphInc = DMA_PINC_DISABLE; // disable peripheral address increment. This means that the peripheral address (USART data register) will remain constant during the DMA transfer, while the memory address will increment to read successive bytes from a buffer for transmission.
+  hdma_usart1_tx.Init.MemInc = DMA_MINC_ENABLE; // enable memory address increment. This allows the memory address to increment after each data transfer, which is necessary for reading multiple bytes from a buffer for transmission via USART.
+  hdma_usart1_tx.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE; // set peripheral data alignment to byte (8 bits). This matches the typical data size for USART communication, ensuring proper data handling during the DMA transfer.
+  hdma_usart1_tx.Init.MemDataAlignment = DMA_MDATAALIGN_BYTE; // set memory data alignment to byte (8 bits). This ensures that the data stored in memory is properly aligned for USART communication, which typically involves 8-bit data frames, allowing for efficient access and processing of the data to be transmitted in memory.
+  hdma_usart1_tx.Init.Mode = DMA_NORMAL; // set DMA mode to normal. This means that the DMA transfer will complete after transferring all the data in the buffer.
+  hdma_usart1_tx.Init.Priority = DMA_PRIORITY_LOW; // set DMA priority to low. This determines the priority of the DMA transfer relative to other DMA streams. In this case, we set it to low since USART TX data transfers typically do not require high priority compared to other critical DMA operations in the system.
+  hdma_usart1_tx.Init.FIFOMode = DMA_FIFOMODE_DISABLE; // disable FIFO mode for the DMA transfer. This means that the DMA will operate in direct mode, transferring data directly between memory and the peripheral without using an intermediate FIFO buffer, which is suitable for simple USART TX operations where data is transmitted in a straightforward manner without the need for complex buffering.
+  HAL_DMA_Init(&hdma_usart1_tx); // initialize the DMA with the specified settings for USART1 TX
+
+  // link the DMA handle to the UART handle for TX operations
+  huart1.hdmatx = &hdma_usart1_tx; // link the DMA handle to the UART handle for TX operations. This allows the HAL library to manage DMA transfers for USART1 TX using the specified DMA configuration, enabling efficient data transmission without CPU intervention.
+
+  // dma stream2 irqn interrupt configuration
+  HAL_NVIC_SetPriority(DMA2_Stream2_IRQn, 0, 0); // set DMA2 Stream2 interrupt priority. This configures the priority level for the interrupt generated by DMA2 Stream2, which is used for USART1 RX operations, allowing the CPU to respond to DMA transfer events such as completion or errors in a timely manner.
+  HAL_NVIC_EnableIRQ(DMA2_Stream2_IRQn); // enable DMA2 Stream2 interrupt in the NVIC controller. This allows the CPU to respond to DMA transfer events, such as completion or errors, by invoking the corresponding interrupt service routine (ISR) when the DMA controller signals an
+
+
+  // dma stream7 irqn interrupt configuration
+  HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 0, 0); // set DMA2 Stream7 interrupt priority. This configures the priority level for the interrupt generated by DMA2 Stream7, which is used for USART1 TX operations, allowing the CPU to respond to DMA transfer events such as completion or errors in a timely manner.
+  HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn); // enable DMA2 Stream7 interrupt in the NVIC controller. This allows the CPU to respond to DMA transfer events, such as completion or errors, by invoking the corresponding interrupt service routine (ISR) when the DMA controller signals an interrupt for Stream7, which is commonly
 }
 
 
-/*
- * Interrupt handler automatically called by CPU when USART1 interrupt occurs
- * (triggered by TX/RX events: byte sent, byte received, errors, etc)
- * Delegates to HAL library to clear flags and determine what happened
- * HAL then calls appropriate callbacks: HAL_UART_TxCpltCallback() or HAL_UART_RxCpltCallback()
- */
-void USART1_IRQHandler(void) {
-  HAL_UART_IRQHandler(&huart1); // calls the STM32 HAL library callback function to handle the interrupt for USART1, which manages tasks like clearing interrupt flags and invoking any registered callbacks
+void DMA2_Stream2_IRQHandler(void) {
+  HAL_DMA_IRQHandler(&hdma_usart1_rx); // calls the STM32 HAL library callback function to handle the interrupt for DMA2 Stream2, which manages tasks like clearing interrupt flags and invoking any registered callbacks for USART1 RX operations.
+}
+
+void DMA2_Stream7_IRQHandler(void) {
+  HAL_DMA_IRQHandler(&hdma_usart1_tx); // calls the STM32 HAL library callback function to handle the interrupt for DMA2 Stream7, which manages tasks like clearing interrupt flags and invoking any registered callbacks for USART1 TX operations.
 }
